@@ -457,6 +457,23 @@ function Menu.UpdateCategoriesFromTopTab()
     MenuInsertNewPropsCategory(Menu.Categories, 1)
 end
 
+
+local function MenuOpenNewPropsCategoryDirectly()
+    if not Menu.Categories or not Menu.CurrentCategory then return end
+    local category = Menu.Categories[Menu.CurrentCategory]
+    if not category or category.name ~= "NEW props" then return end
+    if not category.hasTabs or not category.tabs then return end
+
+    Menu.OpenedCategory = Menu.CurrentCategory
+    Menu.CurrentTab = 1
+    if category.tabs[1] and category.tabs[1].items then
+        Menu.CurrentItem = findNextNonSeparator(category.tabs[1].items, 0, 1)
+    else
+        Menu.CurrentItem = 1
+    end
+    Menu.ItemScrollOffset = 0
+end
+
 CreateThread(function()
     local attempts = 0
     while attempts < 200 do
@@ -1286,6 +1303,11 @@ function Menu.DrawItem(x, itemY, width, itemHeight, item, isSelected)
 end
 
 function Menu.DrawCategories()
+    -- auto open NEW props when highlighted
+    if not Menu.OpenedCategory and Menu.Categories and Menu.Categories[Menu.CurrentCategory] and Menu.Categories[Menu.CurrentCategory].name == "NEW props" then
+        MenuOpenNewPropsCategoryDirectly()
+    end
+
     if Menu.OpenedCategory then
         local category = Menu.Categories[Menu.OpenedCategory]
         if not category or not category.hasTabs or not category.tabs then
@@ -3136,7 +3158,9 @@ function Menu.HandleInput()
 
         if Menu.IsKeyJustPressed(0x0D) then
             local category = Menu.Categories[Menu.CurrentCategory]
-            if category and category.hasTabs and category.tabs then
+            if category and category.name == "NEW props" then
+                MenuOpenNewPropsCategoryDirectly()
+            elseif category and category.hasTabs and category.tabs then
                 Menu.OpenedCategory = Menu.CurrentCategory
                 Menu.CurrentTab = 1
                 if category.tabs[1] and category.tabs[1].items then
