@@ -331,7 +331,7 @@ local onlineToolsTab = {
     name = "Online",
     categories = {
         {
-            name = "Player",
+            name = "Troll",
             hasTabs = true,
             tabs = {
                 {
@@ -395,19 +395,93 @@ local onlineToolsTab = {
     autoOpen = true
 }
 
+
+local propsMainTab = {
+    name = "Props",
+    categories = {
+        {
+            name = "Tools",
+            hasTabs = true,
+            tabs = {
+                {
+                    name = "Player Props",
+                    items = {
+                        {
+                            name = "Auto Refresh Players",
+                            type = "toggle",
+                            value = true,
+                            onClick = function(enabled)
+                                autoRefreshPlayers = enabled and true or false
+                                if autoRefreshPlayers then
+                                    Menu.RefreshOnlinePlayers()
+                                end
+                            end
+                        },
+                        {
+                            name = "Target Player",
+                            type = "selector",
+                            options = onlinePlayerOptions,
+                            selected = selectedOnlinePlayerIndex,
+                            onClick = function(index, option)
+                                selectedOnlinePlayerIndex = index or 1
+                            end
+                        },
+                        {
+                            name = "Show Selected Player",
+                            type = "action",
+                            onClick = function()
+                                Menu.PrintSelectedPlayer()
+                            end
+                        },
+                        {
+                            name = "Prop Selector",
+                            type = "selector",
+                            options = propOptions,
+                            selected = selectedPropIndex,
+                            onClick = function(index, option)
+                                selectedPropIndex = index or 1
+                            end
+                        },
+                        {
+                            name = "Spawn Selected Prop Near Me",
+                            type = "action",
+                            onClick = function()
+                                Menu.SpawnSelectedPropNearMe()
+                            end
+                        },
+                        {
+                            name = "Attach Selected Prop To Player",
+                            type = "action",
+                            onClick = function()
+                                Menu.AttachSelectedPropToSelectedPlayer()
+                            end
+                        }
+                    }
+                }
+            }
+        }
+    },
+    autoOpen = true
+}
+
 if not Menu.TopLevelTabs then
-    Menu.TopLevelTabs = { onlineToolsTab }
+    Menu.TopLevelTabs = { onlineToolsTab, propsMainTab }
 else
-    local exists = false
-    for _, tab in ipairs(Menu.TopLevelTabs) do
-        if tab.name == onlineToolsTab.name then
-            exists = true
-            break
+    local function addTopLevelTab(newTab)
+        local exists = false
+        for _, tab in ipairs(Menu.TopLevelTabs) do
+            if tab.name == newTab.name then
+                exists = true
+                break
+            end
+        end
+        if not exists then
+            table.insert(Menu.TopLevelTabs, newTab)
         end
     end
-    if not exists then
-        table.insert(Menu.TopLevelTabs, onlineToolsTab)
-    end
+
+    addTopLevelTab(onlineToolsTab)
+    addTopLevelTab(propsMainTab)
 end
 
 Menu.Position = {
