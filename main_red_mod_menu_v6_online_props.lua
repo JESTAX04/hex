@@ -445,9 +445,41 @@ local function MenuBuildNewPropsCategory()
                         onClick = function()
                             Menu.AttachSelectedPropToSelectedPlayer()
                         end
+                    }
+                }
+            },
+            {
+                name = "Smoke Action",
+                items = {
+                    {
+                        name = "Auto Refresh Players",
+                        type = "toggle",
+                        value = true,
+                        onClick = function(enabled)
+                            autoRefreshPlayers = enabled and true or false
+                            if autoRefreshPlayers then
+                                Menu.RefreshOnlinePlayers()
+                            end
+                        end
                     },
                     {
-                        name = "Smoke Action",
+                        name = "Target Player",
+                        type = "selector",
+                        options = onlinePlayerOptions,
+                        selected = selectedOnlinePlayerIndex,
+                        onClick = function(index, option)
+                            selectedOnlinePlayerIndex = index or 1
+                        end
+                    },
+                    {
+                        name = "Show Selected Player",
+                        type = "action",
+                        onClick = function()
+                            Menu.PrintSelectedPlayer()
+                        end
+                    },
+                    {
+                        name = "Smoke Action (Self)",
                         type = "action",
                         onClick = function()
                             Menu.SmokeActionSelf()
