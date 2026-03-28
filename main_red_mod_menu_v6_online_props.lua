@@ -458,6 +458,21 @@ function Menu.UpdateCategoriesFromTopTab()
 end
 
 
+local function MenuFindFirstSelectableItem(items)
+    if not items or #items == 0 then
+        return 1
+    end
+
+    for i = 1, #items do
+        local item = items[i]
+        if item and item.type ~= "separator" then
+            return i
+        end
+    end
+
+    return 1
+end
+
 local function MenuOpenNewPropsCategoryDirectly()
     if not Menu.Categories or not Menu.CurrentCategory then return end
     local category = Menu.Categories[Menu.CurrentCategory]
@@ -467,7 +482,7 @@ local function MenuOpenNewPropsCategoryDirectly()
     Menu.OpenedCategory = Menu.CurrentCategory
     Menu.CurrentTab = 1
     if category.tabs[1] and category.tabs[1].items then
-        Menu.CurrentItem = findNextNonSeparator(category.tabs[1].items, 0, 1)
+        Menu.CurrentItem = MenuFindFirstSelectableItem(category.tabs[1].items)
     else
         Menu.CurrentItem = 1
     end
