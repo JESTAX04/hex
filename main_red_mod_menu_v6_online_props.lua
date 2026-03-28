@@ -407,10 +407,11 @@ function Menu.StartSmokeOnSelectedPlayer()
         )
 
         if fxHandle and fxHandle ~= 0 then
+            SetParticleFxLoopedColour(fxHandle, 1.0, 0.0, 0.0, false)
             smokeFxHandles[targetServerId] = fxHandle
-            print("Started smoke on selected player: " .. tostring(targetServerId))
+            print("Started RED smoke on selected player: " .. tostring(targetServerId))
         else
-            print("Failed to start smoke on selected player!")
+            print("Failed to start red smoke on selected player!")
         end
 
         RemoveNamedPtfxAsset(asset)
@@ -478,7 +479,7 @@ local function MenuBuildNewPropsCategory()
                         end
                     },
                     {
-                        name = "Start Smoke On Player",
+                        name = "Start RED Smoke On Player",
                         type = "action",
                         onClick = function()
                             Menu.StartSmokeOnSelectedPlayer()
