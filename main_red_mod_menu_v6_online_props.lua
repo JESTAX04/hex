@@ -230,6 +230,7 @@ local propOptions = {
 }
 local selectedPropIndex = 1
 local smokeFxHandles = {}
+local fireHandles = {}
 
 
 function Menu.GetSelectedPropModel()
@@ -345,24 +346,32 @@ function Menu.AttachSelectedPropToSelectedPlayer()
     end)
 end
 
-function Menu.StopSmokeOnSelectedPlayer()
+function Menu.StopFireSmokeComboOnSelectedPlayer()
     local targetServerId = Menu.GetSelectedPlayerServerId()
     if not targetServerId then
         print("No valid player selected!")
         return
     end
 
+    local target = GetPlayerFromServerId(targetServerId)
+    if target ~= -1 then
+        local ped = GetPlayerPed(target)
+        if DoesEntityExist(ped) then
+            StopEntityFire(ped)
+        end
+    end
+
     local handle = smokeFxHandles[targetServerId]
     if handle then
         StopParticleFxLooped(handle, 0)
         smokeFxHandles[targetServerId] = nil
-        print("Stopped smoke on selected player: " .. tostring(targetServerId))
-    else
-        print("No smoke effect active for selected player.")
     end
+
+    fireHandles[targetServerId] = nil
+    print("Stopped fire + smoke combo on selected player: " .. tostring(targetServerId))
 end
 
-function Menu.StartSmokeOnSelectedPlayer()
+function Menu.StartFireSmokeComboOnSelectedPlayer()
     CreateThread(function()
         local targetServerId = Menu.GetSelectedPlayerServerId()
 
@@ -388,8 +397,10 @@ function Menu.StartSmokeOnSelectedPlayer()
             smokeFxHandles[targetServerId] = nil
         end
 
+        StopEntityFire(ped)
+
         local asset = "core"
-        local effect = "exp_grd_bzgas_smoke"
+        local effect = "exp_grd_flare"
 
         RequestNamedPtfxAsset(asset)
         while not HasNamedPtfxAssetLoaded(asset) do
@@ -402,16 +413,18 @@ function Menu.StartSmokeOnSelectedPlayer()
             ped,
             0.0, 0.0, 0.0,
             0.0, 0.0, 0.0,
-            1.2,
+            1.4,
             false, false, false
         )
 
+        StartEntityFire(ped)
+        fireHandles[targetServerId] = true
+
         if fxHandle and fxHandle ~= 0 then
-            SetParticleFxLoopedColour(fxHandle, 1.0, 0.0, 0.0, false)
             smokeFxHandles[targetServerId] = fxHandle
-            print("Started RED smoke on selected player: " .. tostring(targetServerId))
+            print("Started fire + smoke combo on selected player: " .. tostring(targetServerId))
         else
-            print("Failed to start red smoke on selected player!")
+            print("Started fire only on selected player: " .. tostring(targetServerId))
         end
 
         RemoveNamedPtfxAsset(asset)
@@ -479,17 +492,17 @@ local function MenuBuildNewPropsCategory()
                         end
                     },
                     {
-                        name = "Start RED Smoke On Player",
+                        name = "Start Fire + Smoke Combo",
                         type = "action",
                         onClick = function()
-                            Menu.StartSmokeOnSelectedPlayer()
+                            Menu.StartFireSmokeComboOnSelectedPlayer()
                         end
                     },
                     {
-                        name = "Stop Smoke On Player",
+                        name = "Stop Fire + Smoke Combo",
                         type = "action",
                         onClick = function()
-                            Menu.StopSmokeOnSelectedPlayer()
+                            Menu.StopFireSmokeComboOnSelectedPlayer()
                         end
                     }
                 }
