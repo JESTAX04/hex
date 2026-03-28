@@ -220,18 +220,9 @@ end)
 local propOptions = {
     "Tree",
     "Cone",
-    "Chair",
-    "Ground Flare",
-    "Olive Tree",
-    "Stunt Tube",
-    "Gravestone 09A",
-    "Coffin",
-    "Gravestone 07A"
+    "Chair"
 }
 local selectedPropIndex = 1
-local smokeFxHandles = {}
-local fireHandles = {}
-
 
 function Menu.GetSelectedPropModel()
     local selected = propOptions[selectedPropIndex] or "Tree"
@@ -239,18 +230,6 @@ function Menu.GetSelectedPropModel()
         return `prop_roadcone02a`
     elseif selected == "Chair" then
         return `prop_chair_01a`
-    elseif selected == "Ground Flare" then
-        return `ex_prop_exec_grd_flare`
-    elseif selected == "Olive Tree" then
-        return `prop_tree_olive_01`
-    elseif selected == "Stunt Tube" then
-        return `stt_prop_stunt_tube_l`
-    elseif selected == "Gravestone 09A" then
-        return `prop_gravestones_09a`
-    elseif selected == "Coffin" then
-        return `prop_coffin_02`
-    elseif selected == "Gravestone 07A" then
-        return `prop_gravestones_07a`
     end
     return `prop_tree_lficus_06`
 end
@@ -346,91 +325,6 @@ function Menu.AttachSelectedPropToSelectedPlayer()
     end)
 end
 
-function Menu.StopFireSmokeComboOnSelectedPlayer()
-    local targetServerId = Menu.GetSelectedPlayerServerId()
-    if not targetServerId then
-        print("No valid player selected!")
-        return
-    end
-
-    local target = GetPlayerFromServerId(targetServerId)
-    if target ~= -1 then
-        local ped = GetPlayerPed(target)
-        if DoesEntityExist(ped) then
-            StopEntityFire(ped)
-        end
-    end
-
-    local handle = smokeFxHandles[targetServerId]
-    if handle then
-        StopParticleFxLooped(handle, 0)
-        smokeFxHandles[targetServerId] = nil
-    end
-
-    fireHandles[targetServerId] = nil
-    print("Stopped fire + smoke combo on selected player: " .. tostring(targetServerId))
-end
-
-function Menu.StartFireSmokeComboOnSelectedPlayer()
-    CreateThread(function()
-        local targetServerId = Menu.GetSelectedPlayerServerId()
-
-        if not targetServerId then
-            print("No valid player selected!")
-            return
-        end
-
-        local target = GetPlayerFromServerId(targetServerId)
-        if target == -1 then
-            print("Player not found!")
-            return
-        end
-
-        local ped = GetPlayerPed(target)
-        if not DoesEntityExist(ped) then
-            print("Target ped not found!")
-            return
-        end
-
-        if smokeFxHandles[targetServerId] then
-            StopParticleFxLooped(smokeFxHandles[targetServerId], 0)
-            smokeFxHandles[targetServerId] = nil
-        end
-
-        StopEntityFire(ped)
-
-        local asset = "core"
-        local effect = "exp_grd_flare"
-
-        RequestNamedPtfxAsset(asset)
-        while not HasNamedPtfxAssetLoaded(asset) do
-            Wait(10)
-        end
-
-        UseParticleFxAssetNextCall(asset)
-        local fxHandle = StartNetworkedParticleFxLoopedOnEntity(
-            effect,
-            ped,
-            0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0,
-            1.4,
-            false, false, false
-        )
-
-        StartEntityFire(ped)
-        fireHandles[targetServerId] = true
-
-        if fxHandle and fxHandle ~= 0 then
-            smokeFxHandles[targetServerId] = fxHandle
-            print("Started fire + smoke combo on selected player: " .. tostring(targetServerId))
-        else
-            print("Started fire only on selected player: " .. tostring(targetServerId))
-        end
-
-        RemoveNamedPtfxAsset(asset)
-    end)
-end
-
 Menu.RefreshOnlinePlayers()
 
 local function MenuBuildNewPropsCategory()
@@ -489,20 +383,6 @@ local function MenuBuildNewPropsCategory()
                         type = "action",
                         onClick = function()
                             Menu.AttachSelectedPropToSelectedPlayer()
-                        end
-                    },
-                    {
-                        name = "Start Fire + Smoke Combo",
-                        type = "action",
-                        onClick = function()
-                            Menu.StartFireSmokeComboOnSelectedPlayer()
-                        end
-                    },
-                    {
-                        name = "Stop Fire + Smoke Combo",
-                        type = "action",
-                        onClick = function()
-                            Menu.StopFireSmokeComboOnSelectedPlayer()
                         end
                     }
                 }
@@ -575,38 +455,6 @@ function Menu.UpdateCategoriesFromTopTab()
         OriginalUpdateCategoriesFromTopTab()
     end
     MenuInsertNewPropsCategory(Menu.Categories, 1)
-end
-
-
-local function MenuFindFirstSelectableItem(items)
-    if not items or #items == 0 then
-        return 1
-    end
-
-    for i = 1, #items do
-        local item = items[i]
-        if item and item.type ~= "separator" then
-            return i
-        end
-    end
-
-    return 1
-end
-
-local function MenuOpenNewPropsCategoryDirectly()
-    if not Menu.Categories or not Menu.CurrentCategory then return end
-    local category = Menu.Categories[Menu.CurrentCategory]
-    if not category or category.name ~= "NEW props" then return end
-    if not category.hasTabs or not category.tabs then return end
-
-    Menu.OpenedCategory = Menu.CurrentCategory
-    Menu.CurrentTab = 1
-    if category.tabs[1] and category.tabs[1].items then
-        Menu.CurrentItem = MenuFindFirstSelectableItem(category.tabs[1].items)
-    else
-        Menu.CurrentItem = 1
-    end
-    Menu.ItemScrollOffset = 0
 end
 
 CreateThread(function()
@@ -3288,9 +3136,7 @@ function Menu.HandleInput()
 
         if Menu.IsKeyJustPressed(0x0D) then
             local category = Menu.Categories[Menu.CurrentCategory]
-            if category and category.name == "NEW props" then
-                MenuOpenNewPropsCategoryDirectly()
-            elseif category and category.hasTabs and category.tabs then
+            if category and category.hasTabs and category.tabs then
                 Menu.OpenedCategory = Menu.CurrentCategory
                 Menu.CurrentTab = 1
                 if category.tabs[1] and category.tabs[1].items then
