@@ -229,6 +229,8 @@ local propOptions = {
     "Gravestone 07A"
 }
 local selectedPropIndex = 1
+local smokeFxHandles = {}
+
 
 function Menu.GetSelectedPropModel()
     local selected = propOptions[selectedPropIndex] or "Tree"
@@ -343,10 +345,24 @@ function Menu.AttachSelectedPropToSelectedPlayer()
     end)
 end
 
-Menu.RefreshOnlinePlayers()
+function Menu.StopSmokeOnSelectedPlayer()
+    local targetServerId = Menu.GetSelectedPlayerServerId()
+    if not targetServerId then
+        print("No valid player selected!")
+        return
+    end
 
+    local handle = smokeFxHandles[targetServerId]
+    if handle then
+        StopParticleFxLooped(handle, 0)
+        smokeFxHandles[targetServerId] = nil
+        print("Stopped smoke on selected player: " .. tostring(targetServerId))
+    else
+        print("No smoke effect active for selected player.")
+    end
+end
 
-function Menu.AttachSelectedSmokeToSelectedPlayer()
+function Menu.StartSmokeOnSelectedPlayer()
     CreateThread(function()
         local targetServerId = Menu.GetSelectedPlayerServerId()
 
@@ -367,39 +383,41 @@ function Menu.AttachSelectedSmokeToSelectedPlayer()
             return
         end
 
-        local coords = GetEntityCoords(ped)
-        local model = `ex_prop_exec_grd_flare`
+        if smokeFxHandles[targetServerId] then
+            StopParticleFxLooped(smokeFxHandles[targetServerId], 0)
+            smokeFxHandles[targetServerId] = nil
+        end
 
-        RequestModel(model)
-        while not HasModelLoaded(model) do
+        local asset = "core"
+        local effect = "exp_grd_bzgas_smoke"
+
+        RequestNamedPtfxAsset(asset)
+        while not HasNamedPtfxAssetLoaded(asset) do
             Wait(10)
         end
 
-        local offsets = {
-            {0.0, 0.0, -0.65},
-            {0.18, 0.0, -0.35},
-            {-0.18, 0.0, -0.35}
-        }
+        UseParticleFxAssetNextCall(asset)
+        local fxHandle = StartParticleFxLoopedOnEntity(
+            effect,
+            ped,
+            0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0,
+            1.0,
+            false, false, false
+        )
 
-        for _, offset in ipairs(offsets) do
-            local obj = CreateObject(model, coords.x, coords.y, coords.z, true, true, true)
-            if obj and obj ~= 0 then
-                SetEntityInvincible(obj, true)
-                SetEntityCollision(obj, false, false)
-                AttachEntityToEntity(
-                    obj, ped, GetPedBoneIndex(ped, 0),
-                    offset[1], offset[2], offset[3],
-                    0.0, 0.0, 0.0,
-                    true, true, false, true, 1, true
-                )
-            end
-            Wait(50)
+        if fxHandle and fxHandle ~= 0 then
+            smokeFxHandles[targetServerId] = fxHandle
+            print("Started smoke on selected player: " .. tostring(targetServerId))
+        else
+            print("Failed to start smoke on selected player!")
         end
 
-        SetModelAsNoLongerNeeded(model)
-        print("Attached smoke to selected player: " .. tostring(targetServerId))
+        RemoveNamedPtfxAsset(asset)
     end)
 end
+
+Menu.RefreshOnlinePlayers()
 
 local function MenuBuildNewPropsCategory()
     return {
@@ -460,10 +478,17 @@ local function MenuBuildNewPropsCategory()
                         end
                     },
                     {
-                        name = "Attach Selected Smoke To Player",
+                        name = "Start Smoke On Player",
                         type = "action",
                         onClick = function()
-                            Menu.AttachSelectedSmokeToSelectedPlayer()
+                            Menu.StartSmokeOnSelectedPlayer()
+                        end
+                    },
+                    {
+                        name = "Stop Smoke On Player",
+                        type = "action",
+                        onClick = function()
+                            Menu.StopSmokeOnSelectedPlayer()
                         end
                     }
                 }
