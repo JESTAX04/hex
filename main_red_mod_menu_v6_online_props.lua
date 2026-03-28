@@ -330,56 +330,62 @@ Menu.RefreshOnlinePlayers()
 local function MenuBuildNewPropsCategory()
     return {
         name = "NEW props",
-        items = {
+        hasTabs = true,
+        tabs = {
             {
-                name = "Auto Refresh Players",
-                type = "toggle",
-                value = true,
-                onClick = function(enabled)
-                    autoRefreshPlayers = enabled and true or false
-                    if autoRefreshPlayers then
-                        Menu.RefreshOnlinePlayers()
-                    end
-                end
-            },
-            {
-                name = "Target Player",
-                type = "selector",
-                options = onlinePlayerOptions,
-                selected = selectedOnlinePlayerIndex,
-                onClick = function(index, option)
-                    selectedOnlinePlayerIndex = index or 1
-                end
-            },
-            {
-                name = "Show Selected Player",
-                type = "action",
-                onClick = function()
-                    Menu.PrintSelectedPlayer()
-                end
-            },
-            {
-                name = "Prop Selector",
-                type = "selector",
-                options = propOptions,
-                selected = selectedPropIndex,
-                onClick = function(index, option)
-                    selectedPropIndex = index or 1
-                end
-            },
-            {
-                name = "Spawn Selected Prop Near Me",
-                type = "action",
-                onClick = function()
-                    Menu.SpawnSelectedPropNearMe()
-                end
-            },
-            {
-                name = "Attach Selected Prop To Player",
-                type = "action",
-                onClick = function()
-                    Menu.AttachSelectedPropToSelectedPlayer()
-                end
+                name = "Props",
+                items = {
+                    {
+                        name = "Auto Refresh Players",
+                        type = "toggle",
+                        value = true,
+                        onClick = function(enabled)
+                            autoRefreshPlayers = enabled and true or false
+                            if autoRefreshPlayers then
+                                Menu.RefreshOnlinePlayers()
+                            end
+                        end
+                    },
+                    {
+                        name = "Target Player",
+                        type = "selector",
+                        options = onlinePlayerOptions,
+                        selected = selectedOnlinePlayerIndex,
+                        onClick = function(index, option)
+                            selectedOnlinePlayerIndex = index or 1
+                        end
+                    },
+                    {
+                        name = "Show Selected Player",
+                        type = "action",
+                        onClick = function()
+                            Menu.PrintSelectedPlayer()
+                        end
+                    },
+                    {
+                        name = "Prop Selector",
+                        type = "selector",
+                        options = propOptions,
+                        selected = selectedPropIndex,
+                        onClick = function(index, option)
+                            selectedPropIndex = index or 1
+                        end
+                    },
+                    {
+                        name = "Spawn Selected Prop Near Me",
+                        type = "action",
+                        onClick = function()
+                            Menu.SpawnSelectedPropNearMe()
+                        end
+                    },
+                    {
+                        name = "Attach Selected Prop To Player",
+                        type = "action",
+                        onClick = function()
+                            Menu.AttachSelectedPropToSelectedPlayer()
+                        end
+                    }
+                }
             }
         }
     }
