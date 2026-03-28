@@ -452,8 +452,7 @@ local function MenuBuildNewPropsCategory()
                         onClick = function()
                             Menu.SmokeActionSelf()
                         end
-                    },
-                }
+                    }
                 }
             }
         }
