@@ -220,7 +220,13 @@ end)
 local propOptions = {
     "Tree",
     "Cone",
-    "Chair"
+    "Chair",
+    "Ground Flare",
+    "Olive Tree",
+    "Stunt Tube",
+    "Gravestone 09A",
+    "Coffin",
+    "Gravestone 07A"
 }
 local selectedPropIndex = 1
 
@@ -230,6 +236,18 @@ function Menu.GetSelectedPropModel()
         return `prop_roadcone02a`
     elseif selected == "Chair" then
         return `prop_chair_01a`
+    elseif selected == "Ground Flare" then
+        return `ex_prop_exec_grd_flare`
+    elseif selected == "Olive Tree" then
+        return `prop_tree_olive_01`
+    elseif selected == "Stunt Tube" then
+        return `stt_prop_stunt_tube_l`
+    elseif selected == "Gravestone 09A" then
+        return `prop_gravestones_09a`
+    elseif selected == "Coffin" then
+        return `prop_coffin_02`
+    elseif selected == "Gravestone 07A" then
+        return `prop_gravestones_07a`
     end
     return `prop_tree_lficus_06`
 end
