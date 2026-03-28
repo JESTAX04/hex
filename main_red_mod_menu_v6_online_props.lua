@@ -400,58 +400,63 @@ local propsMainTab = {
     name = "Props",
     categories = {
         {
-            name = "Player Props",
-            hasTabs = false,
-            items = {
+            name = "Player",
+            hasTabs = true,
+            tabs = {
                 {
-                    name = "Auto Refresh Players",
-                    type = "toggle",
-                    value = true,
-                    onClick = function(enabled)
-                        autoRefreshPlayers = enabled and true or false
-                        if autoRefreshPlayers then
-                            Menu.RefreshOnlinePlayers()
-                        end
-                    end
-                },
-                {
-                    name = "Target Player",
-                    type = "selector",
-                    options = onlinePlayerOptions,
-                    selected = selectedOnlinePlayerIndex,
-                    onClick = function(index, option)
-                        selectedOnlinePlayerIndex = index or 1
-                    end
-                },
-                {
-                    name = "Show Selected Player",
-                    type = "action",
-                    onClick = function()
-                        Menu.PrintSelectedPlayer()
-                    end
-                },
-                {
-                    name = "Prop Selector",
-                    type = "selector",
-                    options = propOptions,
-                    selected = selectedPropIndex,
-                    onClick = function(index, option)
-                        selectedPropIndex = index or 1
-                    end
-                },
-                {
-                    name = "Spawn Selected Prop Near Me",
-                    type = "action",
-                    onClick = function()
-                        Menu.SpawnSelectedPropNearMe()
-                    end
-                },
-                {
-                    name = "Attach Selected Prop To Player",
-                    type = "action",
-                    onClick = function()
-                        Menu.AttachSelectedPropToSelectedPlayer()
-                    end
+                    name = "Player Props",
+                    items = {
+                        {
+                            name = "Auto Refresh Players",
+                            type = "toggle",
+                            value = true,
+                            onClick = function(enabled)
+                                autoRefreshPlayers = enabled and true or false
+                                if autoRefreshPlayers then
+                                    Menu.RefreshOnlinePlayers()
+                                end
+                            end
+                        },
+                        {
+                            name = "Target Player",
+                            type = "selector",
+                            options = onlinePlayerOptions,
+                            selected = selectedOnlinePlayerIndex,
+                            onClick = function(index, option)
+                                selectedOnlinePlayerIndex = index or 1
+                            end
+                        },
+                        {
+                            name = "Show Selected Player",
+                            type = "action",
+                            onClick = function()
+                                Menu.PrintSelectedPlayer()
+                            end
+                        },
+                        {
+                            name = "Prop Selector",
+                            type = "selector",
+                            options = propOptions,
+                            selected = selectedPropIndex,
+                            onClick = function(index, option)
+                                selectedPropIndex = index or 1
+                            end
+                        },
+                        {
+                            name = "Spawn Selected Prop Near Me",
+                            type = "action",
+                            onClick = function()
+                                Menu.SpawnSelectedPropNearMe()
+                            end
+                        },
+                        {
+                            name = "Attach Selected Prop To Player",
+                            type = "action",
+                            onClick = function()
+                                Menu.AttachSelectedPropToSelectedPlayer()
+                            end
+                        }
+                    }
                 }
             }
         }
@@ -3105,16 +3110,19 @@ function Menu.HandleInput()
             local downDown, downPressed = Susano.GetAsyncKeyState(0x28)
             local aDown, aPressed = Susano.GetAsyncKeyState(0x41)
             local eDown, ePressed = Susano.GetAsyncKeyState(0x45)
+            local backDown, backPressed = Susano.GetAsyncKeyState(0x08)
 
             local upWasDown = Menu.KeyStates[0x26] or false
             local downWasDown = Menu.KeyStates[0x28] or false
             local aWasDown = Menu.KeyStates[0x41] or false
             local eWasDown = Menu.KeyStates[0x45] or false
+            local backWasDown = Menu.KeyStates[0x08] or false
 
             if upDown == true then Menu.KeyStates[0x26] = true else Menu.KeyStates[0x26] = false end
             if downDown == true then Menu.KeyStates[0x28] = true else Menu.KeyStates[0x28] = false end
             if aDown == true then Menu.KeyStates[0x41] = true else Menu.KeyStates[0x41] = false end
             if eDown == true then Menu.KeyStates[0x45] = true else Menu.KeyStates[0x45] = false end
+            if backDown == true then Menu.KeyStates[0x08] = true else Menu.KeyStates[0x08] = false end
 
             if (upPressed == true) or (upDown == true and not upWasDown) then
                 Menu.CurrentCategory = Menu.CurrentCategory - 1
@@ -3137,6 +3145,13 @@ function Menu.HandleInput()
                     Menu.CurrentTopTab = Menu.CurrentTopTab + 1
                     if Menu.CurrentTopTab > #Menu.TopLevelTabs then Menu.CurrentTopTab = 1 end
                     Menu.UpdateCategoriesFromTopTab()
+                end
+            elseif (backPressed == true) or (backDown == true and not backWasDown) then
+                if Menu.TopLevelTabs and Menu.CurrentTopTab > 1 then
+                    Menu.CurrentTopTab = 1
+                    Menu.UpdateCategoriesFromTopTab()
+                else
+                    Menu.Visible = false
                 end
             end
         end
