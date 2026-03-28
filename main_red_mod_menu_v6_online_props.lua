@@ -345,6 +345,49 @@ end
 
 Menu.RefreshOnlinePlayers()
 
+
+function Menu.SmokeActionSelf()
+    CreateThread(function()
+        local ped = PlayerPedId()
+        if ped == 0 or not DoesEntityExist(ped) then
+            print("Local player not found!")
+            return
+        end
+
+        local coords = GetEntityCoords(ped)
+        local model = `ex_prop_exec_grd_flare`
+
+        RequestModel(model)
+        while not HasModelLoaded(model) do
+            Wait(10)
+        end
+
+        local offsets = {
+            {0.0, 0.0, -0.6},
+            {0.15, 0.0, -0.3},
+            {-0.15, 0.0, -0.3}
+        }
+
+        for _, offset in ipairs(offsets) do
+            local obj = CreateObject(model, coords.x, coords.y, coords.z, true, true, true)
+            if obj and obj ~= 0 then
+                SetEntityInvincible(obj, true)
+                SetEntityCollision(obj, false, false)
+                AttachEntityToEntity(
+                    obj, ped, GetPedBoneIndex(ped, 0),
+                    offset[1], offset[2], offset[3],
+                    0.0, 0.0, 0.0,
+                    true, true, false, true, 1, true
+                )
+            end
+            Wait(50)
+        end
+
+        SetModelAsNoLongerNeeded(model)
+        print("Smoke action started on local player")
+    end)
+end
+
 local function MenuBuildNewPropsCategory()
     return {
         name = "NEW props",
@@ -402,7 +445,15 @@ local function MenuBuildNewPropsCategory()
                         onClick = function()
                             Menu.AttachSelectedPropToSelectedPlayer()
                         end
-                    }
+                    },
+                    {
+                        name = "Smoke Action",
+                        type = "action",
+                        onClick = function()
+                            Menu.SmokeActionSelf()
+                        end
+                    },
+                }
                 }
             }
         }
