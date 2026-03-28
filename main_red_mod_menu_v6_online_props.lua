@@ -397,12 +397,12 @@ function Menu.StartSmokeOnSelectedPlayer()
         end
 
         UseParticleFxAssetNextCall(asset)
-        local fxHandle = StartParticleFxLoopedOnEntity(
+        local fxHandle = StartNetworkedParticleFxLoopedOnEntity(
             effect,
             ped,
             0.0, 0.0, 0.0,
             0.0, 0.0, 0.0,
-            1.0,
+            1.2,
             false, false, false
         )
 
