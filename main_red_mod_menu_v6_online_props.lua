@@ -1318,11 +1318,6 @@ function Menu.DrawItem(x, itemY, width, itemHeight, item, isSelected)
 end
 
 function Menu.DrawCategories()
-    -- auto open NEW props when highlighted
-    if not Menu.OpenedCategory and Menu.Categories and Menu.Categories[Menu.CurrentCategory] and Menu.Categories[Menu.CurrentCategory].name == "NEW props" then
-        MenuOpenNewPropsCategoryDirectly()
-    end
-
     if Menu.OpenedCategory then
         local category = Menu.Categories[Menu.OpenedCategory]
         if not category or not category.hasTabs or not category.tabs then
