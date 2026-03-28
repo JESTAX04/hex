@@ -327,94 +327,144 @@ end
 
 Menu.RefreshOnlinePlayers()
 
-local newPropsTab = {
-    name = "NEW props",
-    categories = {
-        {
-            name = "Player Props",
-            items = {
-                {
-                    name = "Auto Refresh Players",
-                    type = "toggle",
-                    value = true,
-                    onClick = function(enabled)
-                        autoRefreshPlayers = enabled and true or false
-                        if autoRefreshPlayers then
-                            Menu.RefreshOnlinePlayers()
-                        end
+local function MenuBuildNewPropsCategory()
+    return {
+        name = "NEW props",
+        items = {
+            {
+                name = "Auto Refresh Players",
+                type = "toggle",
+                value = true,
+                onClick = function(enabled)
+                    autoRefreshPlayers = enabled and true or false
+                    if autoRefreshPlayers then
+                        Menu.RefreshOnlinePlayers()
                     end
-                },
-                {
-                    name = "Target Player",
-                    type = "selector",
-                    options = onlinePlayerOptions,
-                    selected = selectedOnlinePlayerIndex,
-                    onClick = function(index, option)
-                        selectedOnlinePlayerIndex = index or 1
-                    end
-                },
-                {
-                    name = "Show Selected Player",
-                    type = "action",
-                    onClick = function()
-                        Menu.PrintSelectedPlayer()
-                    end
-                },
-                {
-                    name = "Prop Selector",
-                    type = "selector",
-                    options = propOptions,
-                    selected = selectedPropIndex,
-                    onClick = function(index, option)
-                        selectedPropIndex = index or 1
-                    end
-                },
-                {
-                    name = "Spawn Selected Prop Near Me",
-                    type = "action",
-                    onClick = function()
-                        Menu.SpawnSelectedPropNearMe()
-                    end
-                },
-                {
-                    name = "Attach Selected Prop To Player",
-                    type = "action",
-                    onClick = function()
-                        Menu.AttachSelectedPropToSelectedPlayer()
-                    end
-                }
+                end
+            },
+            {
+                name = "Target Player",
+                type = "selector",
+                options = onlinePlayerOptions,
+                selected = selectedOnlinePlayerIndex,
+                onClick = function(index, option)
+                    selectedOnlinePlayerIndex = index or 1
+                end
+            },
+            {
+                name = "Show Selected Player",
+                type = "action",
+                onClick = function()
+                    Menu.PrintSelectedPlayer()
+                end
+            },
+            {
+                name = "Prop Selector",
+                type = "selector",
+                options = propOptions,
+                selected = selectedPropIndex,
+                onClick = function(index, option)
+                    selectedPropIndex = index or 1
+                end
+            },
+            {
+                name = "Spawn Selected Prop Near Me",
+                type = "action",
+                onClick = function()
+                    Menu.SpawnSelectedPropNearMe()
+                end
+            },
+            {
+                name = "Attach Selected Prop To Player",
+                type = "action",
+                onClick = function()
+                    Menu.AttachSelectedPropToSelectedPlayer()
+                end
             }
         }
-    },
-    autoOpen = true
-}
+    }
+end
 
-if not Menu.TopLevelTabs then
-    Menu.TopLevelTabs = { newPropsTab }
-else
-    local exists = false
-    for _, tab in ipairs(Menu.TopLevelTabs) do
-        if tab.name == newPropsTab.name then
-            exists = true
+local function MenuHasNewPropsCategory(categoryList)
+    if not categoryList then return false end
+    for _, cat in ipairs(categoryList) do
+        if cat and cat.name == "NEW props" then
+            return true
+        end
+    end
+    return false
+end
+
+local function MenuInsertNewPropsCategory(categoryList, headerOffset)
+    if not categoryList or MenuHasNewPropsCategory(categoryList) then
+        return
+    end
+
+    local insertIndex = nil
+    for i, cat in ipairs(categoryList) do
+        if cat and cat.name == "Vehicle" then
+            insertIndex = i
             break
         end
     end
-    if not exists then
-        local insertIndex = nil
-        for i, tab in ipairs(Menu.TopLevelTabs) do
-            if tab.name == "Vehicle" then
+
+    if not insertIndex then
+        for i, cat in ipairs(categoryList) do
+            if cat and cat.name == "Miscellaneous" then
                 insertIndex = i
                 break
             end
         end
+    end
 
-        if insertIndex then
-            table.insert(Menu.TopLevelTabs, insertIndex, newPropsTab)
-        else
-            table.insert(Menu.TopLevelTabs, newPropsTab)
-        end
+    if headerOffset and insertIndex and insertIndex <= headerOffset then
+        insertIndex = nil
+    end
+
+    if insertIndex then
+        table.insert(categoryList, insertIndex, MenuBuildNewPropsCategory())
+    else
+        table.insert(categoryList, MenuBuildNewPropsCategory())
     end
 end
+
+local function MenuEnsureNewPropsEverywhere()
+    if Menu.TopLevelTabs then
+        for _, topTab in ipairs(Menu.TopLevelTabs) do
+            if topTab and topTab.categories then
+                MenuInsertNewPropsCategory(topTab.categories, 0)
+            end
+        end
+    end
+
+    if Menu.Categories then
+        MenuInsertNewPropsCategory(Menu.Categories, 1)
+    end
+end
+
+local OriginalUpdateCategoriesFromTopTab = Menu.UpdateCategoriesFromTopTab
+function Menu.UpdateCategoriesFromTopTab()
+    MenuEnsureNewPropsEverywhere()
+    if OriginalUpdateCategoriesFromTopTab then
+        OriginalUpdateCategoriesFromTopTab()
+    end
+    MenuInsertNewPropsCategory(Menu.Categories, 1)
+end
+
+CreateThread(function()
+    local attempts = 0
+    while attempts < 200 do
+        MenuEnsureNewPropsEverywhere()
+
+        if Menu.TopLevelTabs and #Menu.TopLevelTabs > 0 then
+            Menu.UpdateCategoriesFromTopTab()
+            break
+        end
+
+        attempts = attempts + 1
+        Wait(100)
+    end
+end)
 
 Menu.Position = {
     x = 48,
