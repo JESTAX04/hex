@@ -346,11 +346,24 @@ end
 Menu.RefreshOnlinePlayers()
 
 
-function Menu.SmokeActionSelf()
+function Menu.AttachSelectedSmokeToSelectedPlayer()
     CreateThread(function()
-        local ped = PlayerPedId()
-        if ped == 0 or not DoesEntityExist(ped) then
-            print("Local player not found!")
+        local targetServerId = Menu.GetSelectedPlayerServerId()
+
+        if not targetServerId then
+            print("No valid player selected!")
+            return
+        end
+
+        local target = GetPlayerFromServerId(targetServerId)
+        if target == -1 then
+            print("Player not found!")
+            return
+        end
+
+        local ped = GetPlayerPed(target)
+        if not DoesEntityExist(ped) then
+            print("Target ped not found!")
             return
         end
 
@@ -363,9 +376,9 @@ function Menu.SmokeActionSelf()
         end
 
         local offsets = {
-            {0.0, 0.0, -0.6},
-            {0.15, 0.0, -0.3},
-            {-0.15, 0.0, -0.3}
+            {0.0, 0.0, -0.65},
+            {0.18, 0.0, -0.35},
+            {-0.18, 0.0, -0.35}
         }
 
         for _, offset in ipairs(offsets) do
@@ -384,7 +397,7 @@ function Menu.SmokeActionSelf()
         end
 
         SetModelAsNoLongerNeeded(model)
-        print("Smoke action started on local player")
+        print("Attached smoke to selected player: " .. tostring(targetServerId))
     end)
 end
 
@@ -445,44 +458,12 @@ local function MenuBuildNewPropsCategory()
                         onClick = function()
                             Menu.AttachSelectedPropToSelectedPlayer()
                         end
-                    }
-                }
-            },
-            {
-                name = "Smoke Action",
-                items = {
-                    {
-                        name = "Auto Refresh Players",
-                        type = "toggle",
-                        value = true,
-                        onClick = function(enabled)
-                            autoRefreshPlayers = enabled and true or false
-                            if autoRefreshPlayers then
-                                Menu.RefreshOnlinePlayers()
-                            end
-                        end
                     },
                     {
-                        name = "Target Player",
-                        type = "selector",
-                        options = onlinePlayerOptions,
-                        selected = selectedOnlinePlayerIndex,
-                        onClick = function(index, option)
-                            selectedOnlinePlayerIndex = index or 1
-                        end
-                    },
-                    {
-                        name = "Show Selected Player",
+                        name = "Attach Selected Smoke To Player",
                         type = "action",
                         onClick = function()
-                            Menu.PrintSelectedPlayer()
-                        end
-                    },
-                    {
-                        name = "Smoke Action (Self)",
-                        type = "action",
-                        onClick = function()
-                            Menu.SmokeActionSelf()
+                            Menu.AttachSelectedSmokeToSelectedPlayer()
                         end
                     }
                 }
