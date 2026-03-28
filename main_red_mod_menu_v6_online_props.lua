@@ -69,6 +69,19 @@ function Menu.UpdateCategoriesFromTopTab()
     end
 end
 
+function Menu.BackToMainMenu()
+    if Menu.TopLevelTabs and #Menu.TopLevelTabs > 0 then
+        Menu.CurrentTopTab = 1
+        Menu.UpdateCategoriesFromTopTab()
+        Menu.CurrentCategory = 1
+        Menu.OpenedCategory = nil
+        Menu.CurrentTab = 1
+        Menu.CurrentItem = 1
+        Menu.ItemScrollOffset = 0
+        Menu.CategoryScrollOffset = 0
+    end
+end
+
 Menu.Banner = {
     enabled = false,
     imageUrl = "https://i.imgur.com/cOFPinI.gif",
@@ -406,6 +419,13 @@ local propsMainTab = {
                 {
                     name = "Player Props",
                     items = {
+                        {
+                            name = "Main Menu Back",
+                            type = "action",
+                            onClick = function()
+                                Menu.BackToMainMenu()
+                            end
+                        },
                         {
                             name = "Auto Refresh Players",
                             type = "toggle",
