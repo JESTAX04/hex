@@ -328,15 +328,11 @@ end
 Menu.RefreshOnlinePlayers()
 
 local onlineToolsTab = {
-    name = "Online",
+    name = "Props",
     categories = {
         {
-            name = "Troll",
-            hasTabs = true,
-            tabs = {
-                {
-                    name = "Props",
-                    items = {
+            name = "Player Props",
+            items = {
                         {
                             name = "Auto Refresh Players",
                             type = "toggle",
@@ -387,8 +383,6 @@ local onlineToolsTab = {
                                 Menu.AttachSelectedPropToSelectedPlayer()
                             end
                         }
-                    }
-                }
             }
         }
     },
