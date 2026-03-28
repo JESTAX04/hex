@@ -327,67 +327,61 @@ end
 
 Menu.RefreshOnlinePlayers()
 
-local miscellaneousTab = {
-    name = "Miscellaneous",
+local newPropsTab = {
+    name = "NEW props",
     categories = {
         {
-            name = "Miscellaneous",
-            hasTabs = true,
-            tabs = {
+            name = "Player Props",
+            items = {
                 {
-                    name = "Props",
-                    items = {
-                        {
-                            name = "Auto Refresh Players",
-                            type = "toggle",
-                            value = true,
-                            onClick = function(enabled)
-                                autoRefreshPlayers = enabled and true or false
-                                if autoRefreshPlayers then
-                                    Menu.RefreshOnlinePlayers()
-                                end
-                            end
-                        },
-                        {
-                            name = "Target Player",
-                            type = "selector",
-                            options = onlinePlayerOptions,
-                            selected = selectedOnlinePlayerIndex,
-                            onClick = function(index, option)
-                                selectedOnlinePlayerIndex = index or 1
-                            end
-                        },
-                        {
-                            name = "Show Selected Player",
-                            type = "action",
-                            onClick = function()
-                                Menu.PrintSelectedPlayer()
-                            end
-                        },
-                        {
-                            name = "Prop Selector",
-                            type = "selector",
-                            options = propOptions,
-                            selected = selectedPropIndex,
-                            onClick = function(index, option)
-                                selectedPropIndex = index or 1
-                            end
-                        },
-                        {
-                            name = "Spawn Selected Prop Near Me",
-                            type = "action",
-                            onClick = function()
-                                Menu.SpawnSelectedPropNearMe()
-                            end
-                        },
-                        {
-                            name = "Attach Selected Prop To Player",
-                            type = "action",
-                            onClick = function()
-                                Menu.AttachSelectedPropToSelectedPlayer()
-                            end
-                        }
-                    }
+                    name = "Auto Refresh Players",
+                    type = "toggle",
+                    value = true,
+                    onClick = function(enabled)
+                        autoRefreshPlayers = enabled and true or false
+                        if autoRefreshPlayers then
+                            Menu.RefreshOnlinePlayers()
+                        end
+                    end
+                },
+                {
+                    name = "Target Player",
+                    type = "selector",
+                    options = onlinePlayerOptions,
+                    selected = selectedOnlinePlayerIndex,
+                    onClick = function(index, option)
+                        selectedOnlinePlayerIndex = index or 1
+                    end
+                },
+                {
+                    name = "Show Selected Player",
+                    type = "action",
+                    onClick = function()
+                        Menu.PrintSelectedPlayer()
+                    end
+                },
+                {
+                    name = "Prop Selector",
+                    type = "selector",
+                    options = propOptions,
+                    selected = selectedPropIndex,
+                    onClick = function(index, option)
+                        selectedPropIndex = index or 1
+                    end
+                },
+                {
+                    name = "Spawn Selected Prop Near Me",
+                    type = "action",
+                    onClick = function()
+                        Menu.SpawnSelectedPropNearMe()
+                    end
+                },
+                {
+                    name = "Attach Selected Prop To Player",
+                    type = "action",
+                    onClick = function()
+                        Menu.AttachSelectedPropToSelectedPlayer()
+                    end
                 }
             }
         }
@@ -396,17 +390,29 @@ local miscellaneousTab = {
 }
 
 if not Menu.TopLevelTabs then
-    Menu.TopLevelTabs = { miscellaneousTab }
+    Menu.TopLevelTabs = { newPropsTab }
 else
     local exists = false
     for _, tab in ipairs(Menu.TopLevelTabs) do
-        if tab.name == miscellaneousTab.name then
+        if tab.name == newPropsTab.name then
             exists = true
             break
         end
     end
     if not exists then
-        table.insert(Menu.TopLevelTabs, miscellaneousTab)
+        local insertIndex = nil
+        for i, tab in ipairs(Menu.TopLevelTabs) do
+            if tab.name == "Vehicle" then
+                insertIndex = i
+                break
+            end
+        end
+
+        if insertIndex then
+            table.insert(Menu.TopLevelTabs, insertIndex, newPropsTab)
+        else
+            table.insert(Menu.TopLevelTabs, newPropsTab)
+        end
     end
 end
 
