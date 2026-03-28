@@ -268,6 +268,63 @@ function Menu.PrintSelectedPlayer()
     print("Selected player: " .. selected)
 end
 
+function Menu.GetSelectedPlayerServerId()
+    local selected = onlinePlayerOptions[selectedOnlinePlayerIndex]
+    if not selected or selected == "No players found" then
+        return nil
+    end
+
+    local serverId = string.match(selected, "%[(%d+)%]")
+    return serverId and tonumber(serverId) or nil
+end
+
+function Menu.AttachSelectedPropToSelectedPlayer()
+    CreateThread(function()
+        local targetServerId = Menu.GetSelectedPlayerServerId()
+
+        if not targetServerId then
+            print("No valid player selected!")
+            return
+        end
+
+        local target = GetPlayerFromServerId(targetServerId)
+        if target == -1 then
+            print("Player not found!")
+            return
+        end
+
+        local ped = GetPlayerPed(target)
+        if not DoesEntityExist(ped) then
+            print("Target ped not found!")
+            return
+        end
+
+        local coords = GetEntityCoords(ped)
+        local model = Menu.GetSelectedPropModel()
+
+        RequestModel(model)
+        while not HasModelLoaded(model) do
+            Wait(10)
+        end
+
+        local obj = CreateObject(model, coords.x, coords.y, coords.z, true, true, true)
+        if not obj or obj == 0 then
+            print("Failed to create object!")
+            return
+        end
+
+        AttachEntityToEntity(
+            obj, ped, GetPedBoneIndex(ped, 0),
+            0.0, 0.0, -1.0,
+            0.0, 0.0, 0.0,
+            true, true, false, true, 1, true
+        )
+
+        SetModelAsNoLongerNeeded(model)
+        print("Attached prop to selected player: " .. tostring(targetServerId))
+    end)
+end
+
 Menu.RefreshOnlinePlayers()
 
 local onlineToolsTab = {
@@ -321,6 +378,13 @@ local onlineToolsTab = {
                             type = "action",
                             onClick = function()
                                 Menu.SpawnSelectedPropNearMe()
+                            end
+                        },
+                        {
+                            name = "Attach Selected Prop To Player",
+                            type = "action",
+                            onClick = function()
+                                Menu.AttachSelectedPropToSelectedPlayer()
                             end
                         }
                     }
