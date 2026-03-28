@@ -387,12 +387,10 @@ local onlineToolsTab = {
                                 Menu.AttachSelectedPropToSelectedPlayer()
                             end
                         }
-                    }
-                }
             }
         }
     },
-    autoOpen = true
+    autoOpen = false
 }
 
 
@@ -400,12 +398,9 @@ local propsMainTab = {
     name = "Props",
     categories = {
         {
-            name = "Tools",
-            hasTabs = true,
-            tabs = {
-                {
-                    name = "Player Props",
-                    items = {
+            name = "Player Props",
+            hasTabs = false,
+            items = {
                         {
                             name = "Auto Refresh Players",
                             type = "toggle",
